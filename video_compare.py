@@ -216,13 +216,13 @@ def start():
             offset2 += 10
             ret.append(["both",10])
         cnt += 1
-        print ret
 
     if duration1 > duration2 :
         ret.append([1, duration1])
     else:
-        ret.append([2, duration1])
+        ret.append([2, duration2])
 
+    print ret
     movie_split.splitAll(video1, video2, ret) 
         
 def main():

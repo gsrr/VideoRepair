@@ -6,7 +6,6 @@ import copy
 
 
 def start_split(name, interval, index):
-        # Load myHolidays.mp4 and select the subclip 00:00:50 - 00:00:60
         clip = VideoFileClip(name).subclip(interval[0], interval[1])
 
         # Composite video clips
@@ -16,6 +15,7 @@ def start_split(name, interval, index):
         dest = "files/movie_part%d.mp4" % index
         print "Generate : %s" % dest
         video.write_videofile(dest)
+        return dest
 
 def split4():
     for i in range(4):
@@ -84,6 +84,22 @@ def split_video_test():
     end = float(sys.argv[2])      # end time
     i = int(sys.argv[3])     # index
     split_with_reminder(video, (start, end), i)
+
+def merge_all(sub_paths):
+    clips = []
+    for i in xrange(len(sub_paths)):
+        print sub_paths[i]
+        clip = VideoFileClip(sub_paths[i])
+        duration = clip.duration
+        sub = clip.subclip(0, duration)
+        clips.append(copy.deepcopy(sub))
+
+    # Composite video clips
+    video = concatenate(clips)
+
+    # Write the result to a file
+    print "Generate (final): combine file"
+    video.write_videofile("combin_all.avi",fps=24, codec='mpeg4')
     
 def splitAll(video1, video2, time_list):
     split_list = []
@@ -116,20 +132,22 @@ def splitAll(video1, video2, time_list):
             
     split_list.append((cur_video, time_video[cur_video-1]))
     print split_list
+    sub_paths = []
     for i in range(len(split_list)):
         item = split_list[i]
         if item[0] == 1:
-            start_split(video1, item[1], i) 
+            sub_paths.append(start_split(video1, item[1], i))
         else:
-            start_split(video2, item[1], i) 
+            sub_paths.append(start_split(video2, item[1], i))
             
+    merge_all(sub_paths)
 
 def test_splitAll():
     time_list = eval("[[1, 39.68], ['both', 10], ['both', 10], ['both', 10], ['both', 10], [2, 26.6453], ['both', 10], ['both', 10], ['both', 10], ['both', 10]]")
     splitAll("p124.mp4", "p234.mp4", time_list)
 
 def main():
-    test_splitAll()
+    merge_all(["files/movie_part0.mp4", "files/movie_part1.mp4"])
 
 
 if __name__ == "__main__":
